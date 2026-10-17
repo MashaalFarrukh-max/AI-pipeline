@@ -1,0 +1,3 @@
+Total chunks: 13500
+Embedding time: 383.26 seconds
+Database count: 13500

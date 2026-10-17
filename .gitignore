@@ -23,3 +23,6 @@ week_01_environment_data_preprocessing/data/processed/*
 # Keep folder placeholders
 !week_01_environment_data_preprocessing/data/raw/.gitkeep
 !week_01_environment_data_preprocessing/data/processed/.gitkeep
+
+# Week 2 generated vector database
+week_02_chunking_embeddings_retrieval/chroma_db/
