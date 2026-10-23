@@ -26,3 +26,6 @@ week_01_environment_data_preprocessing/data/processed/*
 
 # Week 2 generated vector database
 week_02_chunking_embeddings_retrieval/chroma_db/
+
+
+week_03_rag_llm_integration/rag.log

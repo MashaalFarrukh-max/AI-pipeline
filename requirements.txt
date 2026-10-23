@@ -9,4 +9,5 @@ beautifulsoup4==4.12.3
 langdetect==1.0.9
 pyarrow==19.0.0
 pytest==8.3.4
-
+groq==1.7.0
+python-dotenv==1.2.4
