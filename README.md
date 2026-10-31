@@ -295,7 +295,7 @@ Run the complete internship test suite from the repository root:
 
 `pytest -v`
 
-Latest verification: 20 tests passed across Weeks 1, 2, and 3.
+At the end of Week 3, 20 tests passed across Weeks 1, 2, and 3. The latest complete internship test suite passes all 29 tests across Weeks 1–4.
 
 ## Error Handling and Limitations
 
@@ -309,3 +309,209 @@ Latest verification: 20 tests passed across Weeks 1, 2, and 3.
 ## Week 3 Outcome
 
 A working retrieval-augmented generation pipeline was implemented and tested. The system retrieves Wikipedia chunks, generates context-grounded responses through Groq, avoids answering when retrieved context is insufficient, and records request latency.
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+# Week 4: Topic Modeling, Named Entity Recognition, and NLP Metadata
+
+## Overview
+
+This week extends the existing Wikipedia retrieval pipeline by adding Natural Language Processing (NLP) metadata. Latent Dirichlet Allocation (LDA) was used for topic modeling, while spaCy was used for Named Entity Recognition (NER).
+
+The extracted metadata was integrated into the existing ChromaDB vector database to support topic-filtered semantic retrieval.
+
+## Objectives
+
+- Apply topic modeling to the cleaned Wikipedia corpus.
+- Discover and label major topics using LDA.
+- Extract named entities using spaCy.
+- Evaluate NER against a manually labeled sample.
+- Enrich existing ChromaDB chunks with topic and entity metadata.
+- Implement topic-filtered semantic retrieval.
+- Add automated tests for the new modules.
+
+## Technologies Used
+
+- Python 3.11
+- scikit-learn
+- Latent Dirichlet Allocation (LDA)
+- spaCy (`en_core_web_sm`)
+- Sentence Transformers (`all-MiniLM-L6-v2`)
+- ChromaDB
+- pandas
+- pytest
+
+## Topic Modeling
+
+LDA was trained on 4,987 cleaned Wikipedia articles.
+
+Eight topics were generated and assigned descriptive labels:
+
+| Topic ID | Topic Label |
+|---|---|
+| 0 | Music |
+| 1 | Geography and Population |
+| 2 | Film and Entertainment |
+| 3 | Technology and General Concepts |
+| 4 | Military and History |
+| 5 | Science, Nature and Culture |
+| 6 | People, Education and Sports |
+| 7 | Places and Urban Geography |
+
+The model generated topic keywords and assigned each article its most probable topic.
+
+## Named Entity Recognition
+
+spaCy's `en_core_web_sm` model was used to extract named entities from the Wikipedia articles.
+
+Detected entity categories include:
+
+- PERSON
+- ORG
+- GPE
+- DATE
+- CARDINAL
+- EVENT
+- WORK_OF_ART
+
+A total of 138,684 entity detections were recorded across 4,987 articles.
+
+## NER Evaluation
+
+A manually labeled sample of 10 articles was used for an initial evaluation.
+
+| Metric | Result |
+|---|---:|
+| Precision | 18.24% |
+| Recall | 41.43% |
+| F1-score | 25.33% |
+
+**Evaluation limitation:** The manual annotations may not include every valid entity in the selected articles. Therefore, unmatched model predictions can be counted as false positives even when they are valid entities. These scores should be treated as preliminary agreement measurements, not definitive model accuracy.
+
+## ChromaDB Metadata Enrichment
+
+The existing ChromaDB collection was enriched without regenerating embeddings.
+
+A total of 13,500 chunks were successfully updated.
+
+The following metadata fields were added:
+
+- `topic_id`
+- `topic_label`
+- `topic_probability`
+- `topic_keywords`
+- `entities`
+- `entity_types`
+
+Existing metadata fields, including `document_id`, `source`, and `title`, were preserved.
+
+## Filtered Semantic Retrieval
+
+A new script, `scripts/filtered_retrieval.py`, was implemented.
+
+The retrieval process:
+
+1. Accepts a search query and selected topic ID.
+2. Converts the query into an embedding using Sentence Transformers.
+3. Applies a ChromaDB topic filter.
+4. Retrieves the five most semantically similar chunks within that topic.
+5. Displays the article title, topic information, distance, and extracted entities.
+
+Two test queries were performed:
+
+- `ISO standards` — Technology and General Concepts.
+- `music albums` — Music.
+
+Both searches successfully returned results belonging to their selected topics.
+
+## Scripts and Source Code
+
+- `src/topic_modeling.py` — text cleaning, LDA training, and topic assignment.
+- `src/ner.py` — named entity extraction using spaCy.
+- `scripts/run_topic_modeling.py` — runs LDA and saves topic results.
+- `scripts/run_ner.py` — extracts entities from the corpus.
+- `scripts/create_labeled_sample.py` — creates a manually labeled sample.
+- `scripts/evaluate_ner.py` — evaluates NER predictions.
+- `scripts/enrich_chroma_metadata.py` — adds NLP metadata to existing ChromaDB chunks.
+- `scripts/filtered_retrieval.py` — performs topic-filtered semantic retrieval.
+- `tests/test_topic_modeling.py` — topic modeling tests.
+- `tests/test_ner.py` — NER tests.
+
+## Running Week 4
+
+From the repository root, activate the virtual environment and install dependencies:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+Download the spaCy English model if it is not already installed:
+
+```powershell
+python -m spacy download en_core_web_sm
+```
+
+Run topic modeling:
+
+```powershell
+python week_04_nlp_metadata/scripts/run_topic_modeling.py
+```
+
+Run NER:
+
+```powershell
+python week_04_nlp_metadata/scripts/run_ner.py
+```
+
+Evaluate NER:
+
+```powershell
+python week_04_nlp_metadata/scripts/evaluate_ner.py
+```
+
+Enrich ChromaDB metadata:
+
+```powershell
+python week_04_nlp_metadata/scripts/enrich_chroma_metadata.py
+```
+
+Run filtered retrieval:
+
+```powershell
+python week_04_nlp_metadata/scripts/filtered_retrieval.py
+```
+
+Run Week 4 tests:
+
+```powershell
+python -m pytest week_04_nlp_metadata/tests -v
+```
+
+## Testing Results
+
+Week 4 automated tests:
+
+- Topic modeling tests: 5 passed.
+- NER tests: 4 passed.
+- Total Week 4 tests: 9 passed.
+
+The complete internship test suite contains **29 passing tests** across all four weeks.
+
+## Week 4 Outcome
+
+LDA topic modeling and spaCy-based NER were integrated into the existing retrieval pipeline. The 13,500 ChromaDB chunks were enriched with NLP metadata, and topic-filtered semantic retrieval was successfully tested.
+
+This extends the original semantic retrieval system with topic-aware filtering and named entity information.

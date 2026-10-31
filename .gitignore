@@ -29,3 +29,7 @@ week_02_chunking_embeddings_retrieval/chroma_db/
 
 
 week_03_rag_llm_integration/rag.log
+
+# Week 4 generated data
+week_04_nlp_metadata/data/*
+!week_04_nlp_metadata/data/topic_labels.json
