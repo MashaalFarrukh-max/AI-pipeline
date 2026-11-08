@@ -1,0 +1,23 @@
+
+[
+    {
+        "question": "What is ISO 10007?",
+        "relevant_ids": [
+            "27666331_0",
+            "27666331_1"
+        ]
+    },
+    {
+        "question": "What is predictive learning and where is it applied?",
+        "relevant_ids": [
+            "2291650_0",
+            "2291650_1"
+        ]
+    },
+    {
+        "question": "What was the population and land area of Wirral-Enniskillen?",
+        "relevant_ids": [
+            "16595372_2"
+        ]
+    }
+]

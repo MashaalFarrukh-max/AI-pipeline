@@ -1,0 +1,172 @@
+
+import json
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+WEEK3_PATH = PROJECT_ROOT / "week_03_rag_llm_integration"
+
+EVALUATION_PATH = (
+    PROJECT_ROOT
+    / "week_05_fastapi_evaluation"
+    / "evaluation"
+)
+
+TEST_SET_PATH = EVALUATION_PATH / "retrieval_test_set.json"
+REPORT_PATH = EVALUATION_PATH / "generation_report.json"
+
+sys.path.insert(0, str(WEEK3_PATH))
+
+from src.rag_pipeline import RAGPipeline
+
+
+def evaluate_answer(question, answer):
+    answer_lower = answer.lower()
+
+    question_words = {
+        word.strip(".,?!")
+        for word in question.lower().split()
+        if len(word) > 3
+    }
+
+    answer_words = set(answer_lower.split())
+
+    matched_words = question_words.intersection(answer_words)
+
+    relevance_score = (
+        len(matched_words) / len(question_words)
+        if question_words else 0.0
+    )
+
+    return {
+        "answer_length": len(answer),
+        "question_keyword_coverage": round(relevance_score, 4),
+        "answer_not_empty": bool(answer.strip()),
+    }
+
+
+def main():
+    print("Loading evaluation dataset...")
+
+    with open(TEST_SET_PATH, "r", encoding="utf-8") as file:
+        test_data = json.load(file)
+
+    print("Loading RAG pipeline...")
+    pipeline = RAGPipeline()
+
+    results = []
+
+    for item in test_data:
+        question = item["question"]
+
+        print("\n" + "=" * 60)
+        print("QUESTION:", question)
+
+        try:
+            response = pipeline.answer(question)
+
+            answer = response["answer"]
+
+            quality = evaluate_answer(question, answer)
+
+            result = {
+                "question": question,
+                "answer": answer,
+                "answer_length": quality["answer_length"],
+                "question_keyword_coverage": quality[
+                    "question_keyword_coverage"
+                ],
+                "answer_not_empty": quality["answer_not_empty"],
+                "retrieval_time": response["retrieval_seconds"],
+                "generation_time": response["generation_seconds"],
+                "total_time": response["total_seconds"],
+                "number_of_sources": len(response["sources"]),
+            }
+
+            results.append(result)
+
+            print("\nGENERATED ANSWER:")
+            print(answer)
+
+            print("\nANSWER QUALITY:")
+            print("Answer length:", quality["answer_length"])
+            print(
+                "Question keyword coverage:",
+                quality["question_keyword_coverage"]
+            )
+            print("Answer is not empty:", quality["answer_not_empty"])
+
+            print("\nLATENCY:")
+            print("Retrieval:", round(response["retrieval_seconds"], 2), "seconds")
+            print("Generation:", round(response["generation_seconds"], 2), "seconds")
+            print("Total:", round(response["total_seconds"], 2), "seconds")
+
+        except Exception as error:
+            print("Evaluation failed:", str(error))
+
+            results.append({
+                "question": question,
+                "error": str(error),
+            })
+
+    successful_results = [
+        item for item in results if "error" not in item
+    ]
+
+    if successful_results:
+        summary = {
+            "average_answer_length": round(
+                sum(item["answer_length"] for item in successful_results)
+                / len(successful_results),
+                2
+            ),
+            "average_keyword_coverage": round(
+                sum(
+                    item["question_keyword_coverage"]
+                    for item in successful_results
+                ) / len(successful_results),
+                4
+            ),
+            "average_retrieval_time": round(
+                sum(item["retrieval_time"] for item in successful_results)
+                / len(successful_results),
+                4
+            ),
+            "average_generation_time": round(
+                sum(item["generation_time"] for item in successful_results)
+                / len(successful_results),
+                4
+            ),
+            "average_total_time": round(
+                sum(item["total_time"] for item in successful_results)
+                / len(successful_results),
+                4
+            ),
+        }
+    else:
+        summary = {}
+
+    final_report = {
+        "number_of_questions": len(test_data),
+        "successful_evaluations": len(successful_results),
+        "failed_evaluations": len(results) - len(successful_results),
+        "results": results,
+        "average_metrics": summary,
+    }
+
+    with open(REPORT_PATH, "w", encoding="utf-8") as file:
+        json.dump(final_report, file, indent=4)
+
+    print("\n" + "=" * 60)
+    print("GENERATION EVALUATION SUMMARY")
+    print("=" * 60)
+
+    for metric, value in summary.items():
+        print(f"{metric}: {value}")
+
+    print("\nReport saved to:", REPORT_PATH)
+
+
+if __name__ == "__main__":
+    main()

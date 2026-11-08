@@ -1,0 +1,47 @@
+{
+    "number_of_questions": 3,
+    "successful_evaluations": 3,
+    "failed_evaluations": 0,
+    "results": [
+        {
+            "question": "What is ISO 10007?",
+            "answer": "ISO\u202f10007 is an ISO standard titled **\u201cQuality management\u202f\u2014\u202fGuidelines for configuration management.\u201d**  \nIt provides guidance on how an organization can use configuration management to support its products from concept through to disposal. The standard was first published in 1995 and updated in 2003 and 2017, and its guidance is specifically recommended for meeting the product\u2011identification and traceability requirements introduced in ISO\u202f9001:2015 and AS9100 Rev\u202fD.  It defines key terms such as *configuration*, *configuration item*, and *configuration baseline* to help organizations manage the functional and physical characteristics of products or services.",
+            "answer_length": 667,
+            "question_keyword_coverage": 0.5,
+            "answer_not_empty": true,
+            "retrieval_time": 0.4524,
+            "generation_time": 0.9241,
+            "total_time": 1.3795,
+            "number_of_sources": 7
+        },
+        {
+            "question": "What is predictive learning and where is it applied?",
+            "answer": "Predictive learning is a machine\u2011learning (ML) technique in which an artificial intelligence model is fed new data so that it can develop an understanding of its environment, its own capabilities, and its limitations.  The method is used in a variety of fields, including neuroscience, business, robotics, and computer vision.",
+            "answer_length": 326,
+            "question_keyword_coverage": 0.4,
+            "answer_not_empty": true,
+            "retrieval_time": 0.044,
+            "generation_time": 0.6225,
+            "total_time": 0.67,
+            "number_of_sources": 4
+        },
+        {
+            "question": "What was the population and land area of Wirral-Enniskillen?",
+            "answer": "The 2021 Census of Population reported that Wirral\u2011Enniskillen had a population of **226 people** and a land area of **about 29.3\u202fkm\u00b2**.",
+            "answer_length": 136,
+            "question_keyword_coverage": 0.6,
+            "answer_not_empty": true,
+            "retrieval_time": 0.0437,
+            "generation_time": 0.6193,
+            "total_time": 0.6662,
+            "number_of_sources": 10
+        }
+    ],
+    "average_metrics": {
+        "average_answer_length": 376.33,
+        "average_keyword_coverage": 0.5,
+        "average_retrieval_time": 0.18,
+        "average_generation_time": 0.722,
+        "average_total_time": 0.9052
+    }
+}

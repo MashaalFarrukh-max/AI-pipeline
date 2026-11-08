@@ -515,3 +515,297 @@ The complete internship test suite contains **29 passing tests** across all four
 LDA topic modeling and spaCy-based NER were integrated into the existing retrieval pipeline. The 13,500 ChromaDB chunks were enriched with NLP metadata, and topic-filtered semantic retrieval was successfully tested.
 
 This extends the original semantic retrieval system with topic-aware filtering and named entity information.
+ 
+
+
+
+
+
+
+
+
+
+# Week 5 – FastAPI Deployment and RAG Evaluation
+
+## Overview
+
+This week focuses on deploying the existing Retrieval-Augmented Generation (RAG) system through a FastAPI service and evaluating its retrieval and generation performance.
+
+The existing RAG pipeline from Week 3 is integrated into a REST API. The service accepts user questions, retrieves relevant document chunks from ChromaDB, and generates answers using the Groq LLM API.
+
+## Objectives
+
+- Deploy the RAG pipeline using FastAPI.
+- Create API endpoints for health checks and question answering.
+- Implement structured JSON request logging.
+- Handle HTTP errors, including 400, 422, and 500.
+- Evaluate retrieval performance using Precision@K and Recall@K.
+- Evaluate generated answers and measure response latency.
+- Create automated tests for API endpoints.
+
+## Technologies Used
+
+- Python 3.11
+- FastAPI
+- Uvicorn
+- Pydantic
+- Pytest
+- HTTPX
+- ChromaDB
+- Sentence Transformers
+- Groq API
+- JSON
+
+## Project Structure
+
+```text
+week_05_fastapi_evaluation/
+│
+├── app/
+│   ├── main.py
+│   ├── schemas.py
+│   └── logging_config.py
+│
+├── evaluation/
+│   ├── retrieval_test_set.json
+│   ├── inspect_retrieval.py
+│   ├── evaluate_retrieval.py
+│   ├── retrieval_report.json
+│   ├── evaluate_generation.py
+│   └── generation_report.json
+│
+├── tests/
+│   └── test_api.py
+│
+└── README.md
+```
+
+## 1. FastAPI Deployment
+
+The existing RAG pipeline is integrated into a FastAPI application.
+
+The API loads the RAG pipeline during application startup and uses it to process incoming questions.
+
+### Available Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | API welcome message |
+| GET | `/health` | Health check |
+| POST | `/ask` | Submit a question to the RAG system |
+
+### Question Request
+
+The `/ask` endpoint accepts a JSON request:
+
+```json
+{
+    "question": "What is ISO 10007?"
+}
+```
+
+### Question Response
+
+The endpoint returns:
+
+- Original question
+- Generated answer
+- Retrieved source chunks
+- Retrieval time
+- Generation time
+- Total response time
+
+### Input Validation
+
+Pydantic validates incoming requests.
+
+- Minimum question length: 3 characters
+- Maximum question length: 1000 characters
+- Missing or invalid fields return HTTP 422.
+
+### HTTP Error Handling
+
+| Status code | Meaning |
+|---|---|
+| 400 | Invalid question or processing input |
+| 422 | Request validation failure |
+| 500 | Unexpected internal server error |
+
+## 2. Structured Request Logging
+
+A custom JSON logging formatter records API activity.
+
+The logs include:
+
+- Timestamp
+- Log level
+- Request method
+- Request path
+- HTTP status code
+- Request duration in milliseconds
+
+This makes API requests easier to monitor and troubleshoot.
+
+## 3. Retrieval Evaluation
+
+Retrieval performance is evaluated using a manually prepared test dataset containing three questions and their relevant ChromaDB chunk IDs.
+
+The evaluation script retrieves the top 10 chunks for each question and calculates Precision@5, Recall@5, Precision@10, and Recall@10.
+
+### Evaluation Results
+
+| Metric | Average score |
+|---|---:|
+| Precision@5 | 0.2667 |
+| Recall@5 | 0.6667 |
+| Precision@10 | 0.1333 |
+| Recall@10 | 0.6667 |
+
+### Metric Explanation
+
+- **Precision@K:** Measures the proportion of the top K retrieved chunks that are relevant.
+- **Recall@K:** Measures the proportion of manually identified relevant chunks that were retrieved within the top K results.
+
+The evaluation uses a small test dataset, so these results provide an initial measurement rather than a comprehensive assessment of retrieval quality.
+
+## 4. Generation Quality and Latency Evaluation
+
+The generation evaluation script uses the existing RAG pipeline to generate answers for the same three evaluation questions.
+
+It records:
+
+- Generated answers
+- Answer length
+- Question keyword coverage
+- Whether the answer is empty
+- Number of retrieved sources
+- Retrieval time
+- Generation time
+- Total response time
+
+Question keyword coverage is a simple automatic indicator based on word overlap between the question and generated answer. It does not independently verify factual correctness.
+
+### Generation Evaluation Results
+
+| Metric | Average result |
+|---|---:|
+| Answer length | 376.33 characters |
+| Question keyword coverage | 0.50 |
+| Retrieval time | 0.18 seconds |
+| Generation time | 0.722 seconds |
+| Total response time | 0.9052 seconds |
+
+All three questions produced non-empty answers.
+
+The results indicate that the RAG pipeline successfully generated responses for the evaluation questions while recording retrieval and generation latency.
+
+## 5. Automated API Testing
+
+Pytest and FastAPI TestClient are used to test the API endpoints.
+
+The tests cover:
+
+1. Home endpoint.
+2. Health endpoint.
+3. Successful question answering.
+4. Rejection of short questions.
+5. Rejection of missing questions.
+6. HTTP 400 error handling.
+7. HTTP 500 error handling.
+
+A mock RAG pipeline is used in API tests to avoid making real LLM API requests during testing.
+
+### Test Results
+
+The complete repository test suite was executed:
+
+```powershell
+python -m pytest
+```
+
+**Final result: 36 passed, 0 failed.**
+
+| Week | Tests passed |
+|---|---:|
+| Week 1 | 5 |
+| Week 2 | 10 |
+| Week 3 | 5 |
+| Week 4 | 9 |
+| Week 5 | 7 |
+| **Total** | **36** |
+
+## 6. Running the API
+
+From the root project directory, activate the virtual environment and run:
+
+```powershell
+python -m uvicorn week_05_fastapi_evaluation.app.main:app --reload
+```
+
+Open the following address in a browser:
+
+```text
+http://127.0.0.1:8000
+```
+
+Interactive API documentation is available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## 7. Running Evaluation Scripts
+
+Run retrieval evaluation:
+
+```powershell
+python week_05_fastapi_evaluation/evaluation/evaluate_retrieval.py
+```
+
+Run generation evaluation:
+
+```powershell
+python week_05_fastapi_evaluation/evaluation/evaluate_generation.py
+```
+
+The evaluation reports are saved as JSON files in the `evaluation` directory.
+
+## 8. Running Tests
+
+Run the complete repository test suite:
+
+```powershell
+python -m pytest
+```
+
+Run only Week 5 API tests:
+
+```powershell
+python -m pytest week_05_fastapi_evaluation/tests/
+```
+
+## 9. Environment Configuration
+
+The project uses a Groq API key stored in the root `.env` file.
+
+The `.env` file must not be committed to GitHub.
+
+The existing ChromaDB database and Week 2 embedding model are reused. The database does not need to be recreated or re-ingested for Week 5.
+
+## 10. Deliverables
+
+- FastAPI service integrated with the existing RAG pipeline.
+- API endpoints for health checks and question answering.
+- Structured JSON request logging.
+- HTTP error handling and request validation.
+- Retrieval evaluation using Precision@K and Recall@K.
+- Generation quality and latency evaluation.
+- JSON evaluation reports.
+- Automated API tests.
+- Complete repository test suite with 36 passing tests.
+
+## Conclusion
+
+Week 5 successfully deploys the existing RAG system through FastAPI and introduces automated retrieval and generation evaluation.
+
+The API provides question-answering functionality, request validation, structured logging, and error handling. Retrieval and generation performance are measured through evaluation scripts, and the complete repository test suite passes all 36 tests.
