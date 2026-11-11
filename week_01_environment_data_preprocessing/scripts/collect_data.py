@@ -1,9 +1,17 @@
 
+"""
+Collect Wikipedia articles using the Wikipedia API.
+
+Articles are stored in JSONL format in the Week 1 raw data directory.
+The script resumes from previously collected articles and avoids duplicates.
+"""
+
 import json
 import time
 from pathlib import Path
 
 import requests
+
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "data" / "raw"
 OUTPUT_FILE = OUTPUT_DIR / "wikipedia_articles.jsonl"
@@ -15,17 +23,37 @@ HEADERS = {
 }
 
 
-def collect_articles():
+def collect_articles() -> None:
+    """
+    Collect Wikipedia articles until the target of 5,000 unique documents
+    is reached or the maximum number of consecutive failures occurs.
+
+    Existing JSONL records are loaded first so collection can resume
+    without downloading duplicate articles.
+
+    Articles with missing IDs, missing titles, or fewer than 100
+    characters of text are skipped.
+
+    Handles temporary Wikipedia API rate limits and request failures
+    using retry delays.
+
+    Returns:
+        None. Writes collected articles to the configured JSONL file
+        and prints collection progress.
+    """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    existing = {}
+    existing: dict[str, dict] = {}
+
     if OUTPUT_FILE.exists():
         with OUTPUT_FILE.open("r", encoding="utf-8") as file:
             for line in file:
                 try:
                     record = json.loads(line)
+
                     if record.get("id") and record.get("text"):
                         existing[str(record["id"])] = record
+
                 except json.JSONDecodeError:
                     continue
 
@@ -33,7 +61,8 @@ def collect_articles():
 
     session = requests.Session()
     session.headers.update(HEADERS)
-    continuation = {}
+
+    continuation: dict = {}
     failures = 0
 
     with OUTPUT_FILE.open("a", encoding="utf-8") as file:
@@ -46,6 +75,7 @@ def collect_articles():
                 "rnlimit": 10,
                 "maxlag": 5,
             }
+
             params.update(continuation)
 
             try:
@@ -87,12 +117,14 @@ def collect_articles():
                     extract_response = session.get(
                         API_URL, params=extract_params, timeout=30
                     )
+
                     extract_response.raise_for_status()
                     extract_data = extract_response.json()
 
                     for page in extract_data.get(
                         "query", {}
                     ).get("pages", {}).values():
+
                         title = page.get("title", "").strip()
                         text = page.get("extract", "").strip()
                         page_id = str(page.get("pageid", ""))
@@ -116,6 +148,7 @@ def collect_articles():
                         file.write(
                             json.dumps(record, ensure_ascii=False) + "\n"
                         )
+
                         file.flush()
                         existing[page_id] = record
 
@@ -129,13 +162,16 @@ def collect_articles():
 
                 continuation = data.get("continue", {})
                 failures = 0
+
                 time.sleep(0.5)
 
             except (requests.RequestException, ValueError) as error:
                 failures += 1
                 wait = min(5 * failures, 60)
+
                 print(f"Request failed: {error}")
                 print(f"Retrying in {wait} seconds...")
+
                 time.sleep(wait)
 
                 if failures >= 10:

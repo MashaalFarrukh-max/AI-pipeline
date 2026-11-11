@@ -1,5 +1,9 @@
+
+"""Enrich ChromaDB chunks with topic modeling and NER metadata."""
+
 import json
 from pathlib import Path
+from typing import Any
 
 import chromadb
 import pandas as pd
@@ -16,13 +20,18 @@ TOPIC_LABELS_PATH = WEEK4_DIR / "data" / "topic_labels.json"
 NER_RESULTS_PATH = WEEK4_DIR / "data" / "ner_results.jsonl"
 
 
-def load_topic_metadata():
+def load_topic_metadata() -> dict[str, dict[str, Any]]:
+    """Load topic assignments and labels for each article.
+
+    Returns:
+        A dictionary mapping article IDs to their topic metadata.
+    """
     topic_df = pd.read_csv(TOPIC_RESULTS_PATH)
 
     with open(TOPIC_LABELS_PATH, "r", encoding="utf-8") as file:
         topic_labels = json.load(file)
 
-    topic_metadata = {}
+    topic_metadata: dict[str, dict[str, Any]] = {}
 
     for _, row in topic_df.iterrows():
         article_id = str(row["id"])
@@ -38,8 +47,13 @@ def load_topic_metadata():
     return topic_metadata
 
 
-def load_ner_metadata():
-    ner_metadata = {}
+def load_ner_metadata() -> dict[str, dict[str, str]]:
+    """Load named entities and entity types for each article.
+
+    Returns:
+        A dictionary mapping article IDs to their NER metadata.
+    """
+    ner_metadata: dict[str, dict[str, str]] = {}
 
     with open(NER_RESULTS_PATH, "r", encoding="utf-8") as file:
         for line in file:
@@ -71,7 +85,8 @@ def load_ner_metadata():
     return ner_metadata
 
 
-def main():
+def main() -> None:
+    """Combine topic and NER metadata and update ChromaDB in batches."""
     print("Loading topic metadata...")
     topic_metadata = load_topic_metadata()
 

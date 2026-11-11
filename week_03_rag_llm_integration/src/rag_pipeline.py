@@ -1,9 +1,12 @@
 
+"""Implement a retrieval-augmented generation pipeline using ChromaDB and Groq."""
+
 import logging
 import os
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 from groq import Groq
@@ -51,7 +54,23 @@ you can only answer questions supported by the documents.
 
 
 class RAGPipeline:
-    def __init__(self, n_results=10, max_distance=0.65):
+    """Retrieve relevant document chunks and generate answers using Groq."""
+
+    def __init__(
+        self,
+        n_results: int = 10,
+        max_distance: float = 0.65
+    ) -> None:
+        """
+        Initialize the Groq client, embedding model, and vector database.
+
+        Args:
+            n_results: Maximum number of chunks to retrieve.
+            max_distance: Maximum retrieval distance for relevant chunks.
+
+        Raises:
+            ValueError: If the API key is missing or n_results is invalid.
+        """
         api_key = os.getenv("GROQ_API_KEY")
 
         if not api_key:
@@ -69,7 +88,24 @@ class RAGPipeline:
         self.n_results = n_results
         self.max_distance = max_distance
 
-    def answer(self, question):
+    def answer(self, question: str) -> dict[str, Any]:
+        """
+        Retrieve relevant context and generate an answer to a question.
+
+        The method measures retrieval and generation time separately.
+        Chunks exceeding the configured distance threshold are excluded.
+
+        Args:
+            question: User question to answer using stored documents.
+
+        Returns:
+            A dictionary containing the generated answer, source chunks,
+            retrieval time, generation time, and total processing time.
+
+        Raises:
+            ValueError: If the question is empty or invalid.
+            Exception: If Groq generation fails.
+        """
         if not isinstance(question, str) or not question.strip():
             raise ValueError("Question must not be empty.")
 

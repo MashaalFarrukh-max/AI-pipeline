@@ -1,16 +1,39 @@
 
+"""Load the sentence-transformer model and generate text embeddings."""
+
 import time
+
 from sentence_transformers import SentenceTransformer
 
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 
 
-def load_model():
+def load_model() -> SentenceTransformer:
+    """Load and return the configured sentence-transformer model."""
     return SentenceTransformer(MODEL_NAME)
 
 
-def generate_embeddings(texts, model=None, batch_size=32):
+def generate_embeddings(
+    texts: list[str],
+    model: SentenceTransformer | None = None,
+    batch_size: int = 32
+) -> tuple:
+    """
+    Generate vector embeddings for a list of texts.
+
+    Args:
+        texts: Text strings to convert into embeddings.
+        model: An optional preloaded sentence-transformer model.
+        batch_size: Number of texts processed in each batch.
+
+    Returns:
+        A tuple containing the generated embeddings and elapsed time
+        in seconds. Returns an empty list and 0.0 for empty input.
+
+    Raises:
+        ValueError: If batch_size is zero or negative.
+    """
     if not texts:
         return [], 0.0
 

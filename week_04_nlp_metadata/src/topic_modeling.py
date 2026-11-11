@@ -1,13 +1,24 @@
 
+"""Clean documents and perform topic modeling using LDA."""
+
+import json
 import re
 from pathlib import Path
+from typing import Any
 
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-def clean_text(text):
-    """Clean text before topic modeling."""
+def clean_text(text: str) -> str:
+    """Clean text before topic modeling.
+
+    Args:
+        text: Input document text.
+
+    Returns:
+        Cleaned text, or an empty string for non-string input.
+    """
     if not isinstance(text, str):
         return ""
 
@@ -18,11 +29,17 @@ def clean_text(text):
     return text.strip()
 
 
-def load_corpus(file_path):
-    """Load JSONL articles from the cleaned corpus."""
-    import json
+def load_corpus(file_path: str | Path) -> list[dict[str, Any]]:
+    """Load JSONL articles from the cleaned corpus.
 
-    documents = []
+    Args:
+        file_path: Path to the cleaned JSONL corpus.
+
+    Returns:
+        A list of valid article dictionaries. Invalid JSON lines
+        and documents with insufficient text are skipped.
+    """
+    documents: list[dict[str, Any]] = []
 
     with open(file_path, "r", encoding="utf-8") as file:
         for line_number, line in enumerate(file, start=1):
@@ -50,8 +67,29 @@ def load_corpus(file_path):
     return documents
 
 
-def train_topic_model(documents, n_topics=8):
-    """Train an LDA model and return topic assignments."""
+def train_topic_model(
+    documents: list[dict[str, Any]],
+    n_topics: int = 8
+) -> tuple[
+    LatentDirichletAllocation,
+    CountVectorizer,
+    list[dict[str, Any]],
+    dict[int, list[str]]
+]:
+    """Train an LDA model and return topic assignments.
+
+    Args:
+        documents: List of documents containing text and metadata.
+        n_topics: Maximum number of topics to discover.
+
+    Returns:
+        A tuple containing the trained LDA model, fitted vectorizer,
+        documents with topic assignments, and topic keywords.
+
+    Raises:
+        ValueError: If fewer than two documents are provided or
+            no usable vocabulary is found.
+    """
     if len(documents) < 2:
         raise ValueError("At least two valid documents are required.")
 
@@ -82,7 +120,7 @@ def train_topic_model(documents, n_topics=8):
     topic_distributions = model.fit_transform(document_term_matrix)
     feature_names = vectorizer.get_feature_names_out()
 
-    topic_keywords = {}
+    topic_keywords: dict[int, list[str]] = {}
 
     for topic_id, topic in enumerate(model.components_):
         top_indices = topic.argsort()[-10:][::-1]
@@ -90,7 +128,7 @@ def train_topic_model(documents, n_topics=8):
             feature_names[index] for index in top_indices
         ]
 
-    results = []
+    results: list[dict[str, Any]] = []
 
     for index, document in enumerate(documents):
         topic_id = int(topic_distributions[index].argmax())

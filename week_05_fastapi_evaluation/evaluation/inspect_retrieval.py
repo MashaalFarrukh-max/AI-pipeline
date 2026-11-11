@@ -1,4 +1,6 @@
 
+"""Inspect retrieved ChromaDB chunks for selected example questions."""
+
 import sys
 from pathlib import Path
 
@@ -16,7 +18,8 @@ from src.embeddings import load_model
 from src.vector_store import VectorStore
 
 
-def main():
+def main() -> None:
+    """Retrieve and display matching chunks for example questions."""
     print("Loading embedding model...")
     model = load_model()
 

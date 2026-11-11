@@ -1,7 +1,10 @@
 
+"""Evaluate retrieval performance using precision and recall metrics."""
+
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -26,7 +29,21 @@ from src.embeddings import load_model
 from src.vector_store import VectorStore
 
 
-def calculate_precision(retrieved_ids, relevant_ids, k):
+def calculate_precision(
+    retrieved_ids: list[str],
+    relevant_ids: list[str],
+    k: int
+) -> float:
+    """Calculate precision among the top-k retrieved documents.
+
+    Args:
+        retrieved_ids: IDs of documents returned by retrieval.
+        relevant_ids: IDs of documents considered relevant.
+        k: Number of top results to evaluate.
+
+    Returns:
+        Proportion of the top-k results that are relevant.
+    """
     top_k = retrieved_ids[:k]
 
     if not top_k:
@@ -39,7 +56,21 @@ def calculate_precision(retrieved_ids, relevant_ids, k):
     return relevant_retrieved / k
 
 
-def calculate_recall(retrieved_ids, relevant_ids, k):
+def calculate_recall(
+    retrieved_ids: list[str],
+    relevant_ids: list[str],
+    k: int
+) -> float:
+    """Calculate the proportion of relevant documents retrieved in top-k.
+
+    Args:
+        retrieved_ids: IDs of documents returned by retrieval.
+        relevant_ids: IDs of documents considered relevant.
+        k: Number of top results to evaluate.
+
+    Returns:
+        Proportion of all relevant documents found in the top-k results.
+    """
     if not relevant_ids:
         return 0.0
 
@@ -52,7 +83,8 @@ def calculate_recall(retrieved_ids, relevant_ids, k):
     return relevant_retrieved / len(relevant_ids)
 
 
-def main():
+def main() -> None:
+    """Evaluate retrieval metrics and save the final report."""
     print("Loading evaluation dataset...")
 
     with open(TEST_SET_PATH, "r", encoding="utf-8") as file:
@@ -64,7 +96,7 @@ def main():
     print("Connecting to existing ChromaDB...")
     vector_store = VectorStore(DATABASE_PATH)
 
-    report = []
+    report: list[dict[str, Any]] = []
 
     for item in test_data:
         question = item["question"]

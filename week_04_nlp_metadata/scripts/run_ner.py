@@ -1,8 +1,10 @@
 
-import csv
+"""Run named entity recognition on the cleaned corpus and save results."""
+
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -30,8 +32,17 @@ OUTPUT_PATH = (
 )
 
 
-def load_documents(file_path):
-    documents = []
+def load_documents(file_path: str | Path) -> list[dict[str, Any]]:
+    """Load valid articles from a JSONL corpus.
+
+    Args:
+        file_path: Path to the cleaned JSONL corpus.
+
+    Returns:
+        A list of article dictionaries containing IDs, titles,
+        and combined text.
+    """
+    documents: list[dict[str, Any]] = []
 
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
@@ -54,7 +65,8 @@ def load_documents(file_path):
     return documents
 
 
-def main():
+def main() -> None:
+    """Load documents, extract named entities, and save the results."""
     print("Loading corpus...")
     documents = load_documents(CORPUS_PATH)
     print(f"Loaded {len(documents)} articles.")

@@ -1,11 +1,12 @@
 
+"""Unit tests for the Week 3 retrieval-augmented generation pipeline."""
+
+import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-
-import sys
-from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -14,7 +15,8 @@ from week_03_rag_llm_integration.src.rag_pipeline import RAGPipeline
 
 
 @pytest.fixture
-def pipeline():
+def pipeline() -> RAGPipeline:
+    """Create a RAG pipeline with mocked external services for testing."""
     with patch.dict("os.environ", {"GROQ_API_KEY": "test-key"}):
         with patch(
             "week_03_rag_llm_integration.src.rag_pipeline.load_model"
@@ -61,7 +63,8 @@ def pipeline():
                     yield instance
 
 
-def test_empty_question_raises_error(pipeline):
+def test_empty_question_raises_error(pipeline: RAGPipeline) -> None:
+    """Check that empty or whitespace-only questions raise ValueError."""
     with pytest.raises(ValueError, match="Question must not be empty"):
         pipeline.answer("")
 
@@ -69,7 +72,10 @@ def test_empty_question_raises_error(pipeline):
         pipeline.answer("   ")
 
 
-def test_relevant_question_returns_answer_and_sources(pipeline):
+def test_relevant_question_returns_answer_and_sources(
+    pipeline: RAGPipeline,
+) -> None:
+    """Check that relevant questions return an answer, sources, and timings."""
     result = pipeline.answer("What is predictive learning?")
 
     assert "Predictive learning" in result["answer"]
@@ -79,7 +85,10 @@ def test_relevant_question_returns_answer_and_sources(pipeline):
     assert result["total_seconds"] >= 0
 
 
-def test_unsupported_question_returns_fallback(pipeline):
+def test_unsupported_question_returns_fallback(
+    pipeline: RAGPipeline,
+) -> None:
+    """Check that irrelevant retrieved content triggers the fallback answer."""
     pipeline.vector_store.search.return_value = {
         "ids": [["chunk-1"]],
         "documents": [["An unrelated article about an ancient city."]],
@@ -98,7 +107,8 @@ def test_unsupported_question_returns_fallback(pipeline):
     pipeline.client.chat.completions.create.assert_not_called()
 
 
-def test_empty_database_returns_fallback(pipeline):
+def test_empty_database_returns_fallback(pipeline: RAGPipeline) -> None:
+    """Check that an empty vector database returns the fallback answer."""
     pipeline.vector_store.search.return_value = {
         "ids": [],
         "documents": [],
@@ -113,7 +123,8 @@ def test_empty_database_returns_fallback(pipeline):
     pipeline.client.chat.completions.create.assert_not_called()
 
 
-def test_groq_failure_is_logged_and_raised(pipeline):
+def test_groq_failure_is_logged_and_raised(pipeline: RAGPipeline) -> None:
+    """Check that Groq API errors are logged and re-raised."""
     pipeline.client.chat.completions.create.side_effect = RuntimeError(
         "Simulated API failure"
     )

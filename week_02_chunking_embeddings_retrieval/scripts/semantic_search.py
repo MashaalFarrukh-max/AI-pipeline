@@ -1,4 +1,6 @@
 
+"""Provide an interactive semantic search interface for ChromaDB."""
+
 import sys
 from pathlib import Path
 
@@ -12,7 +14,13 @@ from src.vector_store import VectorStore
 DATABASE_DIR = WEEK2_DIR / "chroma_db"
 
 
-def main():
+def main() -> None:
+    """
+    Run an interactive semantic search session.
+
+    Loads the existing ChromaDB database and embedding model,
+    accepts user queries, and displays the five closest results.
+    """
     store = VectorStore(DATABASE_DIR)
 
     if store.collection.count() == 0:

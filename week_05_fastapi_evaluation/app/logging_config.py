@@ -1,11 +1,24 @@
 
-import logging
+"""Configure structured JSON logging for the RAG API."""
+
 import json
+import logging
 from datetime import datetime, timezone
 
 
 class JSONFormatter(logging.Formatter):
-    def format(self, record):
+    """Format log records as structured JSON entries."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Convert a log record into a JSON-formatted string.
+
+        Args:
+            record: Logging record containing the event details.
+
+        Returns:
+            A JSON string containing the timestamp, log level,
+            message, and any available request information.
+        """
         log_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
@@ -27,7 +40,12 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(log_entry)
 
 
-def setup_logging():
+def setup_logging() -> logging.Logger:
+    """Set up and return the RAG API logger.
+
+    Returns:
+        A configured logger with JSON-formatted console output.
+    """
     logger = logging.getLogger("rag_api")
     logger.setLevel(logging.INFO)
 

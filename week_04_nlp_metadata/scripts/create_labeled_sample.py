@@ -1,6 +1,10 @@
+
+"""Create a reproducible sample of articles for manual entity labeling."""
+
 import json
 import random
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -19,31 +23,38 @@ OUTPUT_FILE = (
     / "labeled_samples.json"
 )
 
-random.seed(42)
 
-articles = []
+def main() -> None:
+    """Select 10 random articles and save them for manual labeling."""
+    random.seed(42)
 
-with open(INPUT_FILE, "r", encoding="utf-8") as file:
-    for line in file:
-        try:
-            articles.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
+    articles: list[dict[str, Any]] = []
 
-sample = random.sample(articles, 10)
+    with open(INPUT_FILE, "r", encoding="utf-8") as file:
+        for line in file:
+            try:
+                articles.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
 
-results = []
+    sample = random.sample(articles, 10)
 
-for article in sample:
-    results.append({
-        "id": article["id"],
-        "title": article["title"],
-        "text": article["text"][:600],
-        "manual_entities": []
-    })
+    results: list[dict[str, Any]] = []
 
-with open(OUTPUT_FILE, "w", encoding="utf-8") as file:
-    json.dump(results, file, indent=4, ensure_ascii=False)
+    for article in sample:
+        results.append({
+            "id": article["id"],
+            "title": article["title"],
+            "text": article["text"][:600],
+            "manual_entities": []
+        })
 
-print("Created 10 labeled samples.")
-print("Saved to:", OUTPUT_FILE)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as file:
+        json.dump(results, file, indent=4, ensure_ascii=False)
+
+    print("Created 10 labeled samples.")
+    print("Saved to:", OUTPUT_FILE)
+
+
+if __name__ == "__main__":
+    main()

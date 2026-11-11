@@ -809,3 +809,288 @@ The existing ChromaDB database and Week 2 embedding model are reused. The databa
 Week 5 successfully deploys the existing RAG system through FastAPI and introduces automated retrieval and generation evaluation.
 
 The API provides question-answering functionality, request validation, structured logging, and error handling. Retrieval and generation performance are measured through evaluation scripts, and the complete repository test suite passes all 36 tests.
+
+
+
+
+
+
+
+
+# Week 6: Code Documentation, Architecture & Reproducibility
+
+## 1. Overview
+
+Week 6 focuses on improving the documentation, readability, maintainability, and reproducibility of the complete AI text-processing pipeline developed during the internship.
+
+The existing Python codebase from Weeks 1–5 was reviewed and documented using descriptive docstrings and type hints. The original implementation and pipeline behavior were preserved.
+
+## 2. Code Documentation
+
+Documentation improvements were applied across all five weeks.
+
+The following improvements were made:
+
+- Added module-level docstrings explaining the purpose of Python files.
+- Added class and function docstrings describing their responsibilities.
+- Added type hints to function parameters and return values.
+- Improved code readability and consistency.
+- Preserved existing algorithms, configurations, and processing logic.
+
+The documentation covers data preprocessing, text chunking, embeddings, vector storage, RAG, NLP metadata extraction, FastAPI deployment, and evaluation scripts.
+
+## 3. System Architecture
+
+The project follows a modular architecture in which each stage builds on the output of the previous stage.
+
+```text
+             Wikipedia API
+                   |
+                   v
+          Data Collection
+                   |
+                   v
+          Text Preprocessing
+                   |
+                   v
+            Clean Corpus
+                   |
+                   v
+           Text Chunking
+                   |
+                   v
+        Sentence Transformers
+                   |
+                   v
+             Embeddings
+                   |
+                   v
+              ChromaDB
+                   |
+          +--------+--------+
+          |                 |
+          v                 v
+    Semantic Search    NLP Metadata
+          |             (NER and LDA)
+          v                 |
+       RAG Pipeline <--------+
+          |
+          v
+       Groq LLM
+          |
+          v
+      FastAPI Service
+          |
+          v
+     Question Answering
+          |
+          v
+   Retrieval and Generation
+        Evaluation
+```
+
+## 4. Project Setup and Dependencies
+
+### Prerequisites
+
+- Python 3.11
+- Git
+- Internet connection for initial dependency installation and model downloads
+- Groq API key for LLM-powered question answering
+
+### Create and activate the virtual environment
+
+From the project root directory:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### Install dependencies
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+### Environment configuration
+
+Create a `.env` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+```
+
+The API key must remain private and must never be committed to GitHub.
+
+### Run the FastAPI application
+
+```powershell
+uvicorn week_05_fastapi_evaluation.app.main:app --reload
+```
+
+The application runs locally at:
+
+`http://127.0.0.1:8000`
+
+Interactive API documentation is available at:
+
+`http://127.0.0.1:8000/docs`
+
+The existing ChromaDB database is reused. Re-ingestion is not required when the database and its stored data are already available.
+
+## 5. Example API Queries
+
+The application provides a question-answering endpoint.
+
+### Health check
+
+```http
+GET /health
+```
+
+This endpoint checks whether the API service is running.
+
+### Ask a question
+
+```http
+POST /ask
+Content-Type: application/json
+```
+
+Example request:
+
+```json
+{
+    "question": "What is ISO 10007?"
+}
+```
+
+The API processes the question through the RAG pipeline, retrieves relevant information from ChromaDB, and generates an answer using the configured Groq LLM.
+
+The response follows the `QuestionResponse` schema defined in the application.
+
+## 6. Evaluation and Performance Benchmarks
+
+The project includes retrieval, generation, and latency evaluation across the pipeline.
+
+### Week 1: Data preprocessing
+
+- Raw Wikipedia documents collected: 5,000
+- Clean documents produced: 4,987
+
+### Week 2: Chunking and embeddings
+
+| Metric | Result |
+|---|---:|
+| Chunk size | 500 characters |
+| Chunk overlap | 50 characters |
+| Embedding model | all-MiniLM-L6-v2 |
+| Total chunks | 13,500 |
+| Embedding generation time | 383.26 seconds |
+| Average retrieval latency | 90.727 ms |
+
+The retrieval latency was measured using five benchmark queries.
+
+### Week 3: RAG integration
+
+- Integrated ChromaDB retrieval with a Groq language model.
+- Configured retrieval to return up to 10 results.
+- Applied a maximum distance threshold of 0.65.
+
+### Week 4: NLP metadata
+
+- Topic modeling using Latent Dirichlet Allocation (LDA).
+- Number of topics: 8.
+- Named Entity Recognition using spaCy.
+- Total entity detections: 138,684.
+
+The preliminary manually labeled NER evaluation produced:
+
+| Metric | Result |
+|---|---:|
+| Precision | 18.24% |
+| Recall | 41.43% |
+| F1-score | 25.33% |
+
+These results are based on a limited manually labeled sample and should not be interpreted as a comprehensive measure of NER performance.
+
+### Week 5: API and RAG evaluation
+
+- Implemented retrieval evaluation using Precision@K and Recall@K.
+- Implemented generation quality and latency evaluation.
+- Added structured JSON logging.
+- Added automated API tests.
+- Generated JSON evaluation reports.
+
+## 7. Testing and Validation
+
+Automated tests were implemented throughout the project using pytest.
+
+Run the complete test suite from the repository root:
+
+```powershell
+python -m pytest -v
+```
+
+The previously completed full test suite contained 36 passing tests.
+
+Tests cover:
+
+- Text preprocessing
+- Text chunking
+- Vector database operations
+- RAG pipeline behavior
+- Named Entity Recognition
+- Topic modeling
+- FastAPI endpoints
+
+Some scripts that modify datasets, update ChromaDB, or call external APIs are validated through Python compilation rather than being rerun during documentation work.
+
+## 8. Reproducibility
+
+The project uses a consistent environment and existing saved outputs to support reproducibility.
+
+Important considerations:
+
+- Use Python 3.11.
+- Install dependencies using the root `requirements.txt`.
+- Configure the Groq API key through the root `.env` file.
+- Reuse the existing ChromaDB database when available.
+- Keep raw and processed datasets separate.
+- Use the provided scripts to reproduce individual pipeline stages when required.
+- Run automated tests to validate functionality.
+- Keep generated datasets, database files, virtual environments, and API secrets out of GitHub.
+
+## 9. Limitations and Future Improvements
+
+Potential improvements include:
+
+- Increasing the size of the manually labeled NER evaluation dataset.
+- Improving named entity recognition precision and recall.
+- Expanding retrieval benchmark datasets and queries.
+- Evaluating additional embedding models.
+- Improving generated answer quality through more comprehensive evaluation.
+- Adding authentication and deployment configuration for production use.
+- Monitoring API performance under concurrent requests.
+
+## 10. Week 6 Deliverables
+
+- Documented Python codebase covering Weeks 1–5.
+- Module, class, and function docstrings.
+- Type hints across the existing implementation.
+- Comprehensive project documentation.
+- System architecture diagram.
+- Installation and environment setup instructions.
+- Example API requests.
+- Consolidated evaluation metrics and benchmarks.
+- Reproducibility instructions.
+- Testing instructions.
+
+## Week 6 Outcome
+
+Week 6 improves the overall maintainability and usability of the AI text-processing pipeline through comprehensive code documentation and project-level documentation.
+
+The final repository provides a structured explanation of the complete system, from Wikipedia data collection and preprocessing to semantic retrieval, RAG-based question answering, NLP metadata extraction, FastAPI deployment, and evaluation.
+
+The documentation also provides setup instructions, architecture details, performance benchmarks, and testing procedures to help reproduce and understand the project.

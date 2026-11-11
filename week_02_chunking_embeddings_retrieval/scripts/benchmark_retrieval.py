@@ -1,4 +1,6 @@
 
+"""Benchmark ChromaDB retrieval latency using predefined search queries."""
+
 import csv
 import sys
 import time
@@ -23,7 +25,14 @@ QUERIES = [
 ]
 
 
-def main():
+def main() -> None:
+    """
+    Measure retrieval latency for predefined queries.
+
+    Loads the existing vector database and embedding model,
+    measures the time required to retrieve five results per query,
+    and saves the benchmark measurements to a CSV file.
+    """
     store = VectorStore(DATABASE_DIR)
 
     if store.collection.count() == 0:
@@ -31,7 +40,7 @@ def main():
         return
 
     model = load_model()
-    rows = []
+    rows: list[dict] = []
 
     for query in QUERIES:
         query_embedding = model.encode(

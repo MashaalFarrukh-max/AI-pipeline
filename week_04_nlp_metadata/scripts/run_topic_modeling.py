@@ -1,8 +1,11 @@
 
+"""Train the LDA topic model and save article topics and keywords."""
+
 import csv
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -23,7 +26,8 @@ CORPUS_PATH = (
 OUTPUT_DIR = PROJECT_ROOT / "week_04_nlp_metadata" / "data"
 
 
-def main():
+def main() -> None:
+    """Train the LDA model and save topic modeling results."""
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Loading cleaned corpus...")

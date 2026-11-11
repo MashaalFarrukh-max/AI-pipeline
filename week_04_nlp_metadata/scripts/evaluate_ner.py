@@ -1,4 +1,6 @@
 
+"""Evaluate NER predictions against manually labeled entities."""
+
 import json
 import sys
 from pathlib import Path
@@ -21,11 +23,20 @@ SAMPLE_PATH = (
 )
 
 
-def normalize(entity_text):
+def normalize(entity_text: str) -> str:
+    """Normalize entity text for consistent comparison.
+
+    Args:
+        entity_text: Entity text to normalize.
+
+    Returns:
+        Case-insensitive text with normalized whitespace.
+    """
     return " ".join(entity_text.casefold().split())
 
 
-def main():
+def main() -> None:
+    """Calculate precision, recall, and F1-score for NER predictions."""
     with open(SAMPLE_PATH, "r", encoding="utf-8") as file:
         samples = json.load(file)
 

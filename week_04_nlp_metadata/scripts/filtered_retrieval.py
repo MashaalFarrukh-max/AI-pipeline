@@ -1,5 +1,9 @@
+
+"""Perform topic-filtered semantic search using ChromaDB."""
+
 import sys
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -15,9 +19,25 @@ DB_PATH = WEEK2_DIR / "chroma_db"
 COLLECTION_NAME = "wikipedia_chunks"
 
 
-def search_by_topic(query, topic_id, model, collection, n_results=5):
-    """Search ChromaDB using semantic similarity and a topic filter."""
+def search_by_topic(
+    query: str,
+    topic_id: int,
+    model: Any,
+    collection: Any,
+    n_results: int = 5
+) -> dict[str, Any]:
+    """Search ChromaDB using semantic similarity and a topic filter.
 
+    Args:
+        query: Search query entered by the user.
+        topic_id: LDA topic ID used to filter results.
+        model: Loaded sentence-transformers embedding model.
+        collection: ChromaDB collection to search.
+        n_results: Maximum number of results to retrieve.
+
+    Returns:
+        ChromaDB query results containing matching chunks and metadata.
+    """
     query_embedding = model.encode(
         [query],
         convert_to_numpy=True
@@ -33,9 +53,12 @@ def search_by_topic(query, topic_id, model, collection, n_results=5):
     return results
 
 
-def display_results(results):
-    """Display retrieved chunks with NLP metadata."""
+def display_results(results: dict[str, Any]) -> None:
+    """Display retrieved chunks with NLP metadata.
 
+    Args:
+        results: Search results returned by ChromaDB.
+    """
     if not results["ids"] or not results["ids"][0]:
         print("\nNo matching results found.")
         return
@@ -63,7 +86,8 @@ def display_results(results):
         print(document[:700])
 
 
-def main():
+def main() -> None:
+    """Load the vector database and perform topic-filtered search."""
     print("Loading ChromaDB...")
 
     client = chromadb.PersistentClient(path=str(DB_PATH))

@@ -1,3 +1,6 @@
+
+"""Unit tests for the Week 4 named entity recognition module."""
+
 import sys
 from pathlib import Path
 
@@ -9,12 +12,14 @@ sys.path.insert(0, str(WEEK4_DIR))
 from src.ner import NamedEntityExtractor
 
 
-def test_extractor_loads_model():
+def test_extractor_loads_model() -> None:
+    """Check that the spaCy language model loads successfully."""
     extractor = NamedEntityExtractor()
     assert extractor.nlp is not None
 
 
-def test_extract_entities_returns_entities():
+def test_extract_entities_returns_entities() -> None:
+    """Check that entity extraction returns text and entity labels."""
     extractor = NamedEntityExtractor()
 
     text = "Microsoft was founded by Bill Gates in the United States."
@@ -26,14 +31,16 @@ def test_extract_entities_returns_entities():
     assert all("label" in entity for entity in entities)
 
 
-def test_extract_entities_handles_empty_text():
+def test_extract_entities_handles_empty_text() -> None:
+    """Check that empty and invalid text return an empty list."""
     extractor = NamedEntityExtractor()
 
     assert extractor.extract_entities("") == []
     assert extractor.extract_entities(None) == []
 
 
-def test_extract_batch_returns_one_result_per_document():
+def test_extract_batch_returns_one_result_per_document() -> None:
+    """Check that batch extraction returns one result per document."""
     extractor = NamedEntityExtractor()
 
     documents = [

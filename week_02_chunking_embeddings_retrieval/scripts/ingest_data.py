@@ -1,10 +1,9 @@
 
+"""Ingest cleaned documents into the persistent ChromaDB vector database."""
+
 import json
 import sys
-import time
 from pathlib import Path
-
-import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 WEEK2_DIR = Path(__file__).resolve().parents[1]
@@ -28,15 +27,23 @@ DATABASE_DIR = WEEK2_DIR / "chroma_db"
 LOG_FILE = WEEK2_DIR / "ingestion_log.txt"
 
 
-def main():
+def main() -> None:
+    """
+    Read cleaned documents, create chunks and embeddings,
+    and store them in ChromaDB.
+
+    Raises:
+        FileNotFoundError: If the cleaned dataset does not exist.
+        ValueError: If no text chunks are created from the dataset.
+    """
     if not INPUT_FILE.exists():
         raise FileNotFoundError(
             "Clean dataset not found: " + str(INPUT_FILE)
         )
 
-    all_chunks = []
-    all_metadatas = []
-    all_ids = []
+    all_chunks: list[str] = []
+    all_metadatas: list[dict] = []
+    all_ids: list[str] = []
 
     print("Reading cleaned Wikipedia dataset...")
 
