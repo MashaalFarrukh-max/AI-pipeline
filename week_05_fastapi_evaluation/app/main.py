@@ -1,6 +1,6 @@
 
 """Create and configure the FastAPI application for the RAG system."""
-
+from fastapi.responses import HTMLResponse
 import sys
 import time
 from contextlib import asynccontextmanager
@@ -109,13 +109,19 @@ async def log_requests(
     return response
 
 
-@app.get("/")
-def home() -> dict[str, str]:
-    """Return a welcome message and API documentation location."""
-    return {
-        "message": "AI Pipeline RAG API is running",
-        "docs": "/docs",
-    }
+@app.get("/", response_class=HTMLResponse)
+def home() -> HTMLResponse:
+    """Display the AI Knowledge Assistant webpage."""
+
+    html_path = (
+        Path(__file__).resolve().parent
+        / "templates"
+        / "index.html"
+    )
+
+    return HTMLResponse(
+        content=html_path.read_text(encoding="utf-8")
+    )
 
 
 @app.get("/health")
