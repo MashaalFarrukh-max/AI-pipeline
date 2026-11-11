@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
+from collections.abc import Generator
 import numpy as np
 import pytest
 
@@ -15,7 +15,7 @@ from week_03_rag_llm_integration.src.rag_pipeline import RAGPipeline
 
 
 @pytest.fixture
-def pipeline() -> RAGPipeline:
+def pipeline() -> Generator[RAGPipeline, None, None]:
     """Create a RAG pipeline with mocked external services for testing."""
     with patch.dict("os.environ", {"GROQ_API_KEY": "test-key"}):
         with patch(

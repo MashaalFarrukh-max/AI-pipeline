@@ -1,0 +1,7 @@
+
+{
+    "python.analysis.extraPaths": [
+        "./week_02_chunking_embeddings_retrieval",
+        "./week_03_rag_llm_integration"
+    ]
+}
